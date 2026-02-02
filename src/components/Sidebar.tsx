@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { AISettingsPanel } from "./AISettingsPanel";
 import { SettingsPanel, PreviewSettings } from "./SettingsPanel";
+import { UserPanel } from "./UserPanel";
 
 interface SidebarIconProps {
   icon: React.ReactNode;
@@ -39,15 +40,24 @@ interface SidebarProps {
 export const Sidebar = ({ settings, onSettingsChange }: SidebarProps) => {
   const [showAISettings, setShowAISettings] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showUserPanel, setShowUserPanel] = useState(false);
 
   const handleAIClick = () => {
     setShowSettings(false);
+    setShowUserPanel(false);
     setShowAISettings(!showAISettings);
   };
 
   const handleSettingsClick = () => {
     setShowAISettings(false);
+    setShowUserPanel(false);
     setShowSettings(!showSettings);
+  };
+
+  const handleUserClick = () => {
+    setShowAISettings(false);
+    setShowSettings(false);
+    setShowUserPanel(!showUserPanel);
   };
 
   return (
@@ -68,7 +78,11 @@ export const Sidebar = ({ settings, onSettingsChange }: SidebarProps) => {
         </div>
         
         <div className="mt-auto flex flex-col items-center py-3 space-y-1">
-          <SidebarIcon icon={<User size={22} />} tooltip="Profile" />
+          <SidebarIcon 
+            icon={<User size={22} />} 
+            tooltip="Profile" 
+            onClick={handleUserClick}
+          />
         </div>
       </div>
 
@@ -82,6 +96,11 @@ export const Sidebar = ({ settings, onSettingsChange }: SidebarProps) => {
         onClose={() => setShowSettings(false)}
         settings={settings}
         onSettingsChange={onSettingsChange}
+      />
+
+      <UserPanel 
+        isOpen={showUserPanel} 
+        onClose={() => setShowUserPanel(false)} 
       />
     </>
   );
