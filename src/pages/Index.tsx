@@ -27,11 +27,10 @@ const Index = () => {
     showMoveDestination: false,
   });
   const [metadata, setMetadata] = useState<FileMetadata>({
-    category: "",
     tags: [],
+    acara: "",
+    divisi: "",
     description: "",
-    location: "",
-    namingPattern: "original",
   });
 
   const handleOrganizeStart = (scannedFiles: FileItem[]) => {
@@ -47,11 +46,10 @@ const Index = () => {
     setProcessed(0);
     setFoldersCreated(0);
     setMetadata({
-      category: "",
       tags: [],
+      acara: "",
+      divisi: "",
       description: "",
-      location: "",
-      namingPattern: "original",
     });
   };
 
