@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { File, CheckSquare, FolderPlus, Folder, ChevronRight, Activity, Cpu, HardDrive, Wifi, MemoryStick } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { PreviewSettings } from "./SettingsPanel";
+import { FileMetadataForm, FileMetadata } from "./FileMetadataForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface FileItem {
   name: string;
@@ -20,6 +22,8 @@ interface FilePreviewProps {
   status: string;
   isProcessing?: boolean;
   settings: PreviewSettings;
+  metadata: FileMetadata;
+  onMetadataChange: (metadata: FileMetadata) => void;
 }
 
 export const FilePreview = ({ 
@@ -30,7 +34,9 @@ export const FilePreview = ({
   progress,
   status,
   isProcessing = false,
-  settings
+  settings,
+  metadata,
+  onMetadataChange
 }: FilePreviewProps) => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -155,35 +161,48 @@ export const FilePreview = ({
           </div>
         </div>
         
-        {/* Right Panel - Organized Result */}
-        <div className="flex-1 flex flex-col">
-          <div className="px-4 py-2.5 border-b border-border bg-muted/30">
-            <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Organized Result</h3>
-          </div>
-          <div className="flex-1 overflow-auto p-3">
-            {organizedFolders.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                <Folder size={40} className="mb-2 opacity-30" />
-                <p className="text-sm">Waiting for organization...</p>
-              </div>
-            ) : (
-              <div className="space-y-1.5">
-                {organizedFolders.map((folder, index) => (
-                  <div 
-                    key={index} 
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border/50 bg-card/50 hover:bg-muted/30 cursor-pointer transition-colors"
-                  >
-                    <Folder size={18} className="text-amber-400 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground">{folder.name}</p>
-                      <p className="text-xs text-muted-foreground">{folder.count} files</p>
+        {/* Right Panel - Organization Settings & Result */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <Tabs defaultValue="settings" className="flex-1 flex flex-col">
+            <div className="px-4 py-2 border-b border-border bg-muted/30">
+              <TabsList className="h-7 p-0.5">
+                <TabsTrigger value="settings" className="text-xs h-6 px-3">Settings</TabsTrigger>
+                <TabsTrigger value="preview" className="text-xs h-6 px-3">Preview</TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <TabsContent value="settings" className="flex-1 overflow-auto p-3 m-0">
+              <FileMetadataForm 
+                metadata={metadata}
+                onMetadataChange={onMetadataChange}
+              />
+            </TabsContent>
+            
+            <TabsContent value="preview" className="flex-1 overflow-auto p-3 m-0">
+              {organizedFolders.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                  <Folder size={40} className="mb-2 opacity-30" />
+                  <p className="text-sm">Waiting for organization...</p>
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {organizedFolders.map((folder, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border/50 bg-card/50 hover:bg-muted/30 cursor-pointer transition-colors"
+                    >
+                      <Folder size={18} className="text-amber-400 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground">{folder.name}</p>
+                        <p className="text-xs text-muted-foreground">{folder.count} files</p>
+                      </div>
+                      <ChevronRight size={16} className="text-muted-foreground shrink-0" />
                     </div>
-                    <ChevronRight size={16} className="text-muted-foreground shrink-0" />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
