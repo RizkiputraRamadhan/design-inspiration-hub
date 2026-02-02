@@ -4,6 +4,7 @@ import { ExplorerPanel } from "@/components/ExplorerPanel";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { FilePreview } from "@/components/FilePreview";
 import { PreviewSettings } from "@/components/SettingsPanel";
+import { FileMetadata } from "@/components/FileMetadataForm";
 
 interface FileItem {
   name: string;
@@ -25,6 +26,13 @@ const Index = () => {
     showDisk: true,
     showMoveDestination: false,
   });
+  const [metadata, setMetadata] = useState<FileMetadata>({
+    category: "",
+    tags: [],
+    description: "",
+    location: "",
+    namingPattern: "original",
+  });
 
   const handleOrganizeStart = (scannedFiles: FileItem[]) => {
     setFiles(scannedFiles);
@@ -38,6 +46,13 @@ const Index = () => {
     setFiles([]);
     setProcessed(0);
     setFoldersCreated(0);
+    setMetadata({
+      category: "",
+      tags: [],
+      description: "",
+      location: "",
+      namingPattern: "original",
+    });
   };
 
   const totalFiles = files.filter(f => !f.isFolder).length;
@@ -72,6 +87,8 @@ const Index = () => {
             status={status}
             isProcessing={isOrganizing}
             settings={settings}
+            metadata={metadata}
+            onMetadataChange={setMetadata}
           />
         ) : (
           <WelcomeScreen />
