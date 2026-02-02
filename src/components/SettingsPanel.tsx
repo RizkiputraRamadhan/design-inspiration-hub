@@ -1,13 +1,8 @@
-import { X, Moon, Sun, Bell, Globe, Shield, HardDrive, Palette } from "lucide-react";
+import { X, Cpu, Network, MemoryStick, HardDrive, FolderOutput, FolderOpen } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -36,19 +31,62 @@ const SettingItem = ({ icon, title, description, children }: SettingItemProps) =
   </div>
 );
 
-export const SettingsPanel = ({ isOpen, onClose }: SettingsPanelProps) => {
-  const [settings, setSettings] = useState({
-    darkMode: true,
-    notifications: true,
-    autoSave: true,
-    secureDelete: false,
+export interface PreviewSettings {
+  showCpu: boolean;
+  showNetwork: boolean;
+  showMemory: boolean;
+  showDisk: boolean;
+  moveDestination: string | null;
+  moveDestinationHandle: FileSystemDirectoryHandle | null;
+}
+
+interface SettingsPanelComponentProps extends SettingsPanelProps {
+  settings?: PreviewSettings;
+  onSettingsChange?: (settings: PreviewSettings) => void;
+}
+
+export const SettingsPanel = ({ 
+  isOpen, 
+  onClose,
+  settings: externalSettings,
+  onSettingsChange 
+}: SettingsPanelComponentProps) => {
+  const [internalSettings, setInternalSettings] = useState<PreviewSettings>({
+    showCpu: true,
+    showNetwork: true,
+    showMemory: true,
+    showDisk: true,
+    moveDestination: null,
+    moveDestinationHandle: null,
   });
 
-  const [language, setLanguage] = useState("id");
-  const [theme, setTheme] = useState("system");
+  const settings = externalSettings || internalSettings;
 
-  const toggleSetting = (key: keyof typeof settings) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+  const updateSetting = <K extends keyof PreviewSettings>(key: K, value: PreviewSettings[K]) => {
+    const newSettings = { ...settings, [key]: value };
+    if (onSettingsChange) {
+      onSettingsChange(newSettings);
+    } else {
+      setInternalSettings(newSettings);
+    }
+  };
+
+  const selectMoveDestination = async () => {
+    try {
+      if (!('showDirectoryPicker' in window)) {
+        toast.error("Browser tidak mendukung fitur ini. Gunakan Chrome atau Edge terbaru.");
+        return;
+      }
+
+      const handle = await (window as any).showDirectoryPicker();
+      updateSetting('moveDestination', handle.name);
+      updateSetting('moveDestinationHandle', handle);
+      toast.success(`Destination folder: ${handle.name}`);
+    } catch (error: any) {
+      if (error.name !== 'AbortError') {
+        toast.error("Gagal memilih folder");
+      }
+    }
   };
 
   if (!isOpen) return null;
@@ -68,118 +106,87 @@ export const SettingsPanel = ({ isOpen, onClose }: SettingsPanelProps) => {
       </div>
 
       <div className="p-3 space-y-2 overflow-y-auto max-h-[calc(100vh-60px)]">
-        {/* Appearance Section */}
+        {/* Preview Options Section */}
         <div className="mb-4">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 px-1">
-            Tampilan
+            Preview Options
           </p>
           
           <div className="space-y-2">
             <SettingItem
-              icon={settings.darkMode ? <Moon size={16} /> : <Sun size={16} />}
-              title="Mode Gelap"
-              description="Aktifkan tema gelap"
+              icon={<Cpu size={16} />}
+              title="Preview CPU Usage"
+              description="Tampilkan penggunaan CPU"
             >
               <Switch 
-                checked={settings.darkMode} 
-                onCheckedChange={() => toggleSetting('darkMode')}
+                checked={settings.showCpu} 
+                onCheckedChange={(checked) => updateSetting('showCpu', checked)}
               />
             </SettingItem>
 
             <SettingItem
-              icon={<Palette size={16} />}
-              title="Tema"
-              description="Pilih tema aplikasi"
-            >
-              <Select value={theme} onValueChange={setTheme}>
-                <SelectTrigger className="w-24 h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="system">System</SelectItem>
-                  <SelectItem value="light">Light</SelectItem>
-                  <SelectItem value="dark">Dark</SelectItem>
-                </SelectContent>
-              </Select>
-            </SettingItem>
-          </div>
-        </div>
-
-        {/* General Section */}
-        <div className="mb-4">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 px-1">
-            Umum
-          </p>
-          
-          <div className="space-y-2">
-            <SettingItem
-              icon={<Globe size={16} />}
-              title="Bahasa"
-              description="Pilih bahasa aplikasi"
-            >
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="w-24 h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="id">Indonesia</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
-                </SelectContent>
-              </Select>
-            </SettingItem>
-
-            <SettingItem
-              icon={<Bell size={16} />}
-              title="Notifikasi"
-              description="Tampilkan notifikasi"
+              icon={<Network size={16} />}
+              title="Preview Network"
+              description="Tampilkan aktivitas jaringan"
             >
               <Switch 
-                checked={settings.notifications} 
-                onCheckedChange={() => toggleSetting('notifications')}
+                checked={settings.showNetwork} 
+                onCheckedChange={(checked) => updateSetting('showNetwork', checked)}
               />
             </SettingItem>
-          </div>
-        </div>
 
-        {/* Storage Section */}
-        <div className="mb-4">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 px-1">
-            Penyimpanan
-          </p>
-          
-          <div className="space-y-2">
+            <SettingItem
+              icon={<MemoryStick size={16} />}
+              title="Preview Memory"
+              description="Tampilkan penggunaan memori"
+            >
+              <Switch 
+                checked={settings.showMemory} 
+                onCheckedChange={(checked) => updateSetting('showMemory', checked)}
+              />
+            </SettingItem>
+
             <SettingItem
               icon={<HardDrive size={16} />}
-              title="Auto Save"
-              description="Simpan otomatis perubahan"
+              title="Preview Disk"
+              description="Tampilkan penggunaan disk"
             >
               <Switch 
-                checked={settings.autoSave} 
-                onCheckedChange={() => toggleSetting('autoSave')}
-              />
-            </SettingItem>
-
-            <SettingItem
-              icon={<Shield size={16} />}
-              title="Hapus Aman"
-              description="Konfirmasi sebelum hapus"
-            >
-              <Switch 
-                checked={settings.secureDelete} 
-                onCheckedChange={() => toggleSetting('secureDelete')}
+                checked={settings.showDisk} 
+                onCheckedChange={(checked) => updateSetting('showDisk', checked)}
               />
             </SettingItem>
           </div>
         </div>
 
-        {/* Storage Info */}
-        <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-muted-foreground">Penyimpanan Terpakai</span>
-            <span className="text-xs font-medium text-foreground">2.4 GB / 10 GB</span>
-          </div>
-          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-            <div className="h-full w-[24%] bg-primary rounded-full" />
+        {/* Move Destination Section */}
+        <div className="mb-4">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 px-1">
+            Move Destination
+          </p>
+          
+          <div className="p-3 rounded-lg bg-card/50 border border-border/50">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-md bg-muted text-muted-foreground">
+                <FolderOutput size={16} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-medium text-foreground">Folder Tujuan</h4>
+                <p className="text-xs text-muted-foreground truncate">
+                  {settings.moveDestination || "Belum dipilih"}
+                </p>
+              </div>
+            </div>
+            
+            <Button 
+              variant="outline"
+              size="sm"
+              className="w-full gap-2"
+              onClick={selectMoveDestination}
+            >
+              <FolderOpen size={14} />
+              Browse Folder
+            </Button>
           </div>
         </div>
       </div>
