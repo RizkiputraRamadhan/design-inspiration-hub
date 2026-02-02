@@ -1,12 +1,9 @@
 import { 
   FolderOpen, 
-  Search, 
-  History, 
-  Settings, 
   Sparkles,
   LayoutGrid,
-  Tag,
-  Trash2
+  Settings,
+  User
 } from "lucide-react";
 
 interface SidebarIconProps {
@@ -35,15 +32,12 @@ export const Sidebar = () => {
     <div className="flex flex-col h-full w-14 bg-sidebar border-r border-sidebar-border">
       <div className="flex flex-col items-center py-3 space-y-1">
         <SidebarIcon icon={<FolderOpen size={22} />} active tooltip="Files" />
-        <SidebarIcon icon={<Search size={22} />} tooltip="Search" />
         <SidebarIcon icon={<Sparkles size={22} />} tooltip="AI Organize" />
         <SidebarIcon icon={<LayoutGrid size={22} />} tooltip="Categories" />
-        <SidebarIcon icon={<Tag size={22} />} tooltip="Tags" />
-        <SidebarIcon icon={<History size={22} />} tooltip="History" />
-        <SidebarIcon icon={<Trash2 size={22} />} tooltip="Duplicates" />
       </div>
       
       <div className="mt-auto flex flex-col items-center py-3 space-y-1">
+        <SidebarIcon icon={<User size={22} />} tooltip="Profile" />
         <SidebarIcon icon={<Settings size={22} />} tooltip="Settings" />
       </div>
     </div>
