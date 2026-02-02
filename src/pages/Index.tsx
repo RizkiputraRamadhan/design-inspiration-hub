@@ -3,7 +3,6 @@ import { Sidebar } from "@/components/Sidebar";
 import { ExplorerPanel } from "@/components/ExplorerPanel";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { FilePreview } from "@/components/FilePreview";
-import { StatusBar } from "@/components/StatusBar";
 
 interface FileItem {
   name: string;
@@ -65,9 +64,6 @@ const Index = () => {
           <WelcomeScreen />
         )}
       </div>
-      
-      {/* Status Bar */}
-      <StatusBar />
     </div>
   );
 };
