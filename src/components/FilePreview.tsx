@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { PreviewSettings } from "./SettingsPanel";
 import { FileMetadataForm, FileMetadata } from "./FileMetadataForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface FileItem {
   name: string;
@@ -114,15 +115,15 @@ export const FilePreview = ({
       </div>
       
       {/* Split View */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
         {/* Left Panel - Source Files */}
-        <div className="flex-1 flex flex-col border-r border-border">
-          <div className="px-4 py-2.5 border-b border-border bg-muted/30">
+        <div className="flex-1 flex flex-col border-b md:border-b-0 md:border-r border-border min-h-0 max-h-[50%] md:max-h-none">
+          <div className="px-4 py-2.5 border-b border-border bg-muted/30 shrink-0">
             <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Source Files</h3>
           </div>
-          <div className="flex-1 overflow-auto">
+          <ScrollArea className="flex-1">
             <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-muted/50 backdrop-blur-sm">
+              <thead className="sticky top-0 bg-muted/50 backdrop-blur-sm z-10">
                 <tr className="text-left text-xs text-muted-foreground uppercase">
                   <th className="px-4 py-2.5 font-semibold">Filename</th>
                   <th className="px-4 py-2.5 font-semibold">Size</th>
@@ -147,32 +148,32 @@ export const FilePreview = ({
                           ) : (
                             <File size={15} className="text-muted-foreground shrink-0" />
                           )}
-                          <span className="text-foreground text-sm">{file.name}</span>
+                          <span className="text-foreground text-sm truncate">{file.name}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-2.5 text-muted-foreground text-sm">{file.size}</td>
-                      <td className="px-4 py-2.5 text-muted-foreground text-sm">{file.type}</td>
-                      <td className="px-4 py-2.5 text-muted-foreground text-sm">{file.lastModified}</td>
+                      <td className="px-4 py-2.5 text-muted-foreground text-sm whitespace-nowrap">{file.size}</td>
+                      <td className="px-4 py-2.5 text-muted-foreground text-sm whitespace-nowrap">{file.type}</td>
+                      <td className="px-4 py-2.5 text-muted-foreground text-sm whitespace-nowrap">{file.lastModified}</td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
-          </div>
+          </ScrollArea>
         </div>
         
         {/* Right Panel - Organization Settings & Result */}
-        <div className="flex-1 flex flex-col min-w-0">
-          <Tabs defaultValue="settings" className="flex-1 flex flex-col">
-            <div className="px-4 py-2 border-b border-border bg-muted/30">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0 max-h-[50%] md:max-h-none">
+          <Tabs defaultValue="settings" className="flex-1 flex flex-col min-h-0">
+            <div className="px-4 py-2 border-b border-border bg-muted/30 shrink-0">
               <TabsList className="h-7 p-0.5">
                 <TabsTrigger value="settings" className="text-xs h-6 px-3">Settings</TabsTrigger>
                 <TabsTrigger value="preview" className="text-xs h-6 px-3">Preview</TabsTrigger>
               </TabsList>
             </div>
             
-            <TabsContent value="settings" className="flex-1 overflow-hidden p-3 m-0">
-              <div className="h-full">
+            <TabsContent value="settings" className="flex-1 overflow-hidden p-3 m-0 min-h-0">
+              <div className="h-full overflow-hidden">
                 <FileMetadataForm 
                   metadata={metadata}
                   onMetadataChange={onMetadataChange}
@@ -180,29 +181,31 @@ export const FilePreview = ({
               </div>
             </TabsContent>
             
-            <TabsContent value="preview" className="flex-1 overflow-auto p-3 m-0">
-              {organizedFolders.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                  <Folder size={40} className="mb-2 opacity-30" />
-                  <p className="text-sm">Waiting for organization...</p>
-                </div>
-              ) : (
-                <div className="space-y-1.5">
-                  {organizedFolders.map((folder, index) => (
-                    <div 
-                      key={index} 
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border/50 bg-card/50 hover:bg-muted/30 cursor-pointer transition-colors"
-                    >
-                      <Folder size={18} className="text-amber-400 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground">{folder.name}</p>
-                        <p className="text-xs text-muted-foreground">{folder.count} files</p>
+            <TabsContent value="preview" className="flex-1 p-3 m-0 min-h-0">
+              <ScrollArea className="h-full">
+                {organizedFolders.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-12">
+                    <Folder size={40} className="mb-2 opacity-30" />
+                    <p className="text-sm">Waiting for organization...</p>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    {organizedFolders.map((folder, index) => (
+                      <div 
+                        key={index} 
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border/50 bg-card/50 hover:bg-muted/30 cursor-pointer transition-colors"
+                      >
+                        <Folder size={18} className="text-amber-400 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground">{folder.name}</p>
+                          <p className="text-xs text-muted-foreground">{folder.count} files</p>
+                        </div>
+                        <ChevronRight size={16} className="text-muted-foreground shrink-0" />
                       </div>
-                      <ChevronRight size={16} className="text-muted-foreground shrink-0" />
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
             </TabsContent>
           </Tabs>
         </div>
