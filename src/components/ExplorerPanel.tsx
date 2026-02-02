@@ -11,10 +11,9 @@ interface FolderInfo {
 
 export const ExplorerPanel = () => {
   const [sourceFolder, setSourceFolder] = useState<FolderInfo | null>(null);
-  const [destinationFolder, setDestinationFolder] = useState<FolderInfo | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const selectFolder = async (type: 'source' | 'destination') => {
+  const selectFolder = async () => {
     try {
       if (!('showDirectoryPicker' in window)) {
         toast.error("Browser tidak mendukung fitur ini. Gunakan Chrome atau Edge terbaru.");
@@ -24,13 +23,8 @@ export const ExplorerPanel = () => {
       const handle = await (window as any).showDirectoryPicker();
       const path = handle.name;
       
-      if (type === 'source') {
-        setSourceFolder({ name: handle.name, path, handle });
-        toast.success(`Source: ${handle.name}`);
-      } else {
-        setDestinationFolder({ name: handle.name, path, handle });
-        toast.success(`Destination: ${handle.name}`);
-      }
+      setSourceFolder({ name: handle.name, path, handle });
+      toast.success(`Folder selected: ${handle.name}`);
     } catch (error: any) {
       if (error.name !== 'AbortError') {
         toast.error("Gagal memilih folder");
@@ -40,7 +34,6 @@ export const ExplorerPanel = () => {
 
   const resetSelection = () => {
     setSourceFolder(null);
-    setDestinationFolder(null);
     setIsProcessing(false);
   };
 
@@ -51,9 +44,9 @@ export const ExplorerPanel = () => {
   };
 
   const handleOrganize = () => {
-    if (sourceFolder && destinationFolder) {
+    if (sourceFolder) {
       setIsProcessing(true);
-      toast.success(`Organizing files from "${sourceFolder.name}" to "${destinationFolder.name}"`);
+      toast.success(`Organizing files in "${sourceFolder.name}"`);
     }
   };
 
@@ -68,7 +61,7 @@ export const ExplorerPanel = () => {
         <span className="text-xs font-semibold uppercase tracking-wider text-sidebar-foreground">
           File Organizer
         </span>
-        {(sourceFolder || destinationFolder) && (
+        {sourceFolder && (
           <button 
             onClick={resetSelection}
             className="flex items-center gap-1.5 px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent rounded transition-colors"
@@ -80,11 +73,11 @@ export const ExplorerPanel = () => {
       </div>
       
       <div className="flex-1 flex flex-col p-4 space-y-4 overflow-auto">
-        {/* Source Folder Card */}
+        {/* Folder Path Card */}
         <div className="rounded-xl bg-card border border-border p-4">
           <div className="flex items-center gap-2 mb-4">
             <FolderOpen size={18} className="text-primary" />
-            <span className="text-sm font-semibold text-foreground">Source Path</span>
+            <span className="text-sm font-semibold text-foreground">Folder Path</span>
           </div>
           
           <div className="mb-3">
@@ -97,31 +90,7 @@ export const ExplorerPanel = () => {
           
           <Button 
             className="w-full"
-            onClick={() => selectFolder('source')}
-          >
-            Browse Folder
-          </Button>
-        </div>
-
-        {/* Destination Folder Card */}
-        <div className="rounded-xl bg-card border border-border p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <FolderOpen size={18} className="text-primary" />
-            <span className="text-sm font-semibold text-foreground">Destination Path</span>
-          </div>
-          
-          <div className="mb-3">
-            <div className="flex items-center gap-2 px-3 py-2.5 bg-muted rounded-lg border border-border">
-              <span className="text-sm text-muted-foreground truncate flex-1">
-                {destinationFolder ? destinationFolder.path : "No folder selected"}
-              </span>
-            </div>
-          </div>
-          
-          <Button 
-            className="w-full"
-            disabled={!sourceFolder}
-            onClick={() => selectFolder('destination')}
+            onClick={selectFolder}
           >
             Browse Folder
           </Button>
@@ -146,7 +115,7 @@ export const ExplorerPanel = () => {
             
             <Button 
               className="w-full gap-2 bg-success hover:bg-success/90 text-success-foreground"
-              disabled={!sourceFolder || !destinationFolder || isProcessing}
+              disabled={!sourceFolder || isProcessing}
               onClick={handleOrganize}
             >
               <Sparkles size={16} />
