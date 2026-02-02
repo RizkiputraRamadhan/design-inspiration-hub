@@ -71,6 +71,7 @@ const Index = () => {
             progress={progress}
             status={status}
             isProcessing={isOrganizing}
+            settings={settings}
           />
         ) : (
           <WelcomeScreen />

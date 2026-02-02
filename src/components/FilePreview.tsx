@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { File, CheckSquare, FolderPlus, Folder, ChevronRight, Activity, Cpu, HardDrive, Wifi, MemoryStick } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { PreviewSettings } from "./SettingsPanel";
 
 interface FileItem {
   name: string;
@@ -18,6 +19,7 @@ interface FilePreviewProps {
   progress: number;
   status: string;
   isProcessing?: boolean;
+  settings: PreviewSettings;
 }
 
 export const FilePreview = ({ 
@@ -27,7 +29,8 @@ export const FilePreview = ({
   foldersCreated,
   progress,
   status,
-  isProcessing = false
+  isProcessing = false,
+  settings
 }: FilePreviewProps) => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -209,28 +212,38 @@ export const FilePreview = ({
               Remaining: <span className="text-foreground">00:00</span>
             </span>
             
-            <div className="flex items-center gap-4 ml-4 pl-4 border-l border-border">
-              <div className="flex items-center gap-1.5">
-                <Cpu size={12} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">CPU</span>
-                <span className="text-xs text-foreground">12%</span>
+            {(settings.showCpu || settings.showMemory || settings.showDisk || settings.showNetwork) && (
+              <div className="flex items-center gap-4 ml-4 pl-4 border-l border-border">
+                {settings.showCpu && (
+                  <div className="flex items-center gap-1.5">
+                    <Cpu size={12} className="text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">CPU</span>
+                    <span className="text-xs text-foreground">12%</span>
+                  </div>
+                )}
+                {settings.showMemory && (
+                  <div className="flex items-center gap-1.5">
+                    <MemoryStick size={12} className="text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Memory</span>
+                    <span className="text-xs text-foreground">45%</span>
+                  </div>
+                )}
+                {settings.showDisk && (
+                  <div className="flex items-center gap-1.5">
+                    <HardDrive size={12} className="text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Disk</span>
+                    <span className="text-xs text-foreground">2%</span>
+                  </div>
+                )}
+                {settings.showNetwork && (
+                  <div className="flex items-center gap-1.5">
+                    <Wifi size={12} className="text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Network</span>
+                    <span className="text-xs text-foreground">0 KB/s</span>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-1.5">
-                <MemoryStick size={12} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Memory</span>
-                <span className="text-xs text-foreground">45%</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <HardDrive size={12} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Disk</span>
-                <span className="text-xs text-foreground">2%</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Wifi size={12} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Network</span>
-                <span className="text-xs text-foreground">0 KB/s</span>
-              </div>
-            </div>
+            )}
           </div>
           
           <span className={`text-xs font-medium ${processed > 0 ? 'text-success' : 'text-muted-foreground'}`}>
