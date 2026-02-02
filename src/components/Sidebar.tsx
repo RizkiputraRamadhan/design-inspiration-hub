@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { 
   FolderOpen, 
   Sparkles,
@@ -5,18 +6,21 @@ import {
   Settings,
   User
 } from "lucide-react";
+import { AISettingsPanel } from "./AISettingsPanel";
 
 interface SidebarIconProps {
   icon: React.ReactNode;
   active?: boolean;
   badge?: number;
   tooltip?: string;
+  onClick?: () => void;
 }
 
-const SidebarIcon = ({ icon, active, badge, tooltip }: SidebarIconProps) => (
+const SidebarIcon = ({ icon, active, badge, tooltip, onClick }: SidebarIconProps) => (
   <button 
     className={`sidebar-icon relative ${active ? 'active' : ''}`}
     title={tooltip}
+    onClick={onClick}
   >
     {icon}
     {badge && (
@@ -28,18 +32,31 @@ const SidebarIcon = ({ icon, active, badge, tooltip }: SidebarIconProps) => (
 );
 
 export const Sidebar = () => {
+  const [showAISettings, setShowAISettings] = useState(false);
+
   return (
-    <div className="flex flex-col h-full w-14 bg-sidebar border-r border-sidebar-border">
-      <div className="flex flex-col items-center py-3 space-y-1">
-        <SidebarIcon icon={<FolderOpen size={22} />} active tooltip="Files" />
-        <SidebarIcon icon={<Sparkles size={22} />} tooltip="AI Organize" />
-        <SidebarIcon icon={<LayoutGrid size={22} />} tooltip="Categories" />
+    <>
+      <div className="flex flex-col h-full w-14 bg-sidebar border-r border-sidebar-border relative z-10">
+        <div className="flex flex-col items-center py-3 space-y-1">
+          <SidebarIcon icon={<FolderOpen size={22} />} active tooltip="Files" />
+          <SidebarIcon 
+            icon={<Sparkles size={22} />} 
+            tooltip="AI Organize" 
+            onClick={() => setShowAISettings(!showAISettings)}
+          />
+          <SidebarIcon icon={<LayoutGrid size={22} />} tooltip="Categories" />
+        </div>
+        
+        <div className="mt-auto flex flex-col items-center py-3 space-y-1">
+          <SidebarIcon icon={<User size={22} />} tooltip="Profile" />
+          <SidebarIcon icon={<Settings size={22} />} tooltip="Settings" />
+        </div>
       </div>
-      
-      <div className="mt-auto flex flex-col items-center py-3 space-y-1">
-        <SidebarIcon icon={<User size={22} />} tooltip="Profile" />
-        <SidebarIcon icon={<Settings size={22} />} tooltip="Settings" />
-      </div>
-    </div>
+
+      <AISettingsPanel 
+        isOpen={showAISettings} 
+        onClose={() => setShowAISettings(false)} 
+      />
+    </>
   );
 };
