@@ -6,6 +6,7 @@ import {
   User
 } from "lucide-react";
 import { AISettingsPanel } from "./AISettingsPanel";
+import { SettingsPanel } from "./SettingsPanel";
 
 interface SidebarIconProps {
   icon: React.ReactNode;
@@ -32,6 +33,17 @@ const SidebarIcon = ({ icon, active, badge, tooltip, onClick }: SidebarIconProps
 
 export const Sidebar = () => {
   const [showAISettings, setShowAISettings] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  const handleAIClick = () => {
+    setShowSettings(false);
+    setShowAISettings(!showAISettings);
+  };
+
+  const handleSettingsClick = () => {
+    setShowAISettings(false);
+    setShowSettings(!showSettings);
+  };
 
   return (
     <>
@@ -41,9 +53,13 @@ export const Sidebar = () => {
           <SidebarIcon 
             icon={<Sparkles size={22} />} 
             tooltip="AI Organize" 
-            onClick={() => setShowAISettings(!showAISettings)}
+            onClick={handleAIClick}
           />
-          <SidebarIcon icon={<Settings size={22} />} tooltip="Settings" />
+          <SidebarIcon 
+            icon={<Settings size={22} />} 
+            tooltip="Settings" 
+            onClick={handleSettingsClick}
+          />
         </div>
         
         <div className="mt-auto flex flex-col items-center py-3 space-y-1">
@@ -54,6 +70,11 @@ export const Sidebar = () => {
       <AISettingsPanel 
         isOpen={showAISettings} 
         onClose={() => setShowAISettings(false)} 
+      />
+      
+      <SettingsPanel 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)} 
       />
     </>
   );
