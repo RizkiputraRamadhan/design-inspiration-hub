@@ -68,29 +68,23 @@ export const FilePreview = ({
       {/* Top Bar - Stats Left + Status Right */}
       <div className="flex items-center gap-4 px-4 py-3 border-b border-border bg-muted/20">
         {/* Stats - Left Side */}
-        <div className="flex items-center gap-4 shrink-0">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border">
-            <File size={14} className="text-primary" />
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xs text-muted-foreground">Files</span>
-              <span className="text-lg font-bold text-foreground">{totalFiles}</span>
-            </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-card border border-border">
+            <File size={12} className="text-primary" />
+            <span className="text-xs text-muted-foreground">Files</span>
+            <span className="text-sm font-bold text-foreground">{totalFiles}</span>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border">
-            <CheckSquare size={14} className="text-success" />
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xs text-muted-foreground">Processed</span>
-              <span className="text-lg font-bold text-foreground">{processed}</span>
-            </div>
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-card border border-border">
+            <CheckSquare size={12} className="text-success" />
+            <span className="text-xs text-muted-foreground">Processed</span>
+            <span className="text-sm font-bold text-foreground">{processed}</span>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border">
-            <FolderPlus size={14} className="text-amber-400" />
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xs text-muted-foreground">Folders</span>
-              <span className="text-lg font-bold text-foreground">{foldersCreated}</span>
-            </div>
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-card border border-border">
+            <FolderPlus size={12} className="text-amber-400" />
+            <span className="text-xs text-muted-foreground">Folders</span>
+            <span className="text-sm font-bold text-foreground">{foldersCreated}</span>
           </div>
         </div>
 
