@@ -1,8 +1,5 @@
-import { X, Cpu, Network, MemoryStick, HardDrive, FolderOutput, FolderOpen } from "lucide-react";
+import { X, Cpu, Network, MemoryStick, HardDrive, FolderOutput } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -36,57 +33,24 @@ export interface PreviewSettings {
   showNetwork: boolean;
   showMemory: boolean;
   showDisk: boolean;
-  moveDestination: string | null;
-  moveDestinationHandle: FileSystemDirectoryHandle | null;
+  showMoveDestination: boolean;
 }
 
 interface SettingsPanelComponentProps extends SettingsPanelProps {
-  settings?: PreviewSettings;
-  onSettingsChange?: (settings: PreviewSettings) => void;
+  settings: PreviewSettings;
+  onSettingsChange: (settings: PreviewSettings) => void;
 }
 
 export const SettingsPanel = ({ 
   isOpen, 
   onClose,
-  settings: externalSettings,
+  settings,
   onSettingsChange 
 }: SettingsPanelComponentProps) => {
-  const [internalSettings, setInternalSettings] = useState<PreviewSettings>({
-    showCpu: true,
-    showNetwork: true,
-    showMemory: true,
-    showDisk: true,
-    moveDestination: null,
-    moveDestinationHandle: null,
-  });
-
-  const settings = externalSettings || internalSettings;
 
   const updateSetting = <K extends keyof PreviewSettings>(key: K, value: PreviewSettings[K]) => {
     const newSettings = { ...settings, [key]: value };
-    if (onSettingsChange) {
-      onSettingsChange(newSettings);
-    } else {
-      setInternalSettings(newSettings);
-    }
-  };
-
-  const selectMoveDestination = async () => {
-    try {
-      if (!('showDirectoryPicker' in window)) {
-        toast.error("Browser tidak mendukung fitur ini. Gunakan Chrome atau Edge terbaru.");
-        return;
-      }
-
-      const handle = await (window as any).showDirectoryPicker();
-      updateSetting('moveDestination', handle.name);
-      updateSetting('moveDestinationHandle', handle);
-      toast.success(`Destination folder: ${handle.name}`);
-    } catch (error: any) {
-      if (error.name !== 'AbortError') {
-        toast.error("Gagal memilih folder");
-      }
-    }
+    onSettingsChange(newSettings);
   };
 
   if (!isOpen) return null;
@@ -96,7 +60,7 @@ export const SettingsPanel = ({
       className="absolute left-14 top-0 h-full w-72 bg-background/95 backdrop-blur-sm border-r border-border shadow-xl z-20 animate-in slide-in-from-left-2 duration-200"
     >
       <div className="p-4 border-b border-border flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">Pengaturan</h3>
+        <h3 className="text-sm font-semibold text-foreground">Settings</h3>
         <button 
           onClick={onClose}
           className="p-1 rounded-md hover:bg-muted transition-colors"
@@ -116,7 +80,7 @@ export const SettingsPanel = ({
             <SettingItem
               icon={<Cpu size={16} />}
               title="Preview CPU Usage"
-              description="Tampilkan penggunaan CPU"
+              description="Show CPU usage information"
             >
               <Switch 
                 checked={settings.showCpu} 
@@ -127,7 +91,7 @@ export const SettingsPanel = ({
             <SettingItem
               icon={<Network size={16} />}
               title="Preview Network"
-              description="Tampilkan aktivitas jaringan"
+              description="Show network activity"
             >
               <Switch 
                 checked={settings.showNetwork} 
@@ -138,7 +102,7 @@ export const SettingsPanel = ({
             <SettingItem
               icon={<MemoryStick size={16} />}
               title="Preview Memory"
-              description="Tampilkan penggunaan memori"
+              description="Show memory usage"
             >
               <Switch 
                 checked={settings.showMemory} 
@@ -149,7 +113,7 @@ export const SettingsPanel = ({
             <SettingItem
               icon={<HardDrive size={16} />}
               title="Preview Disk"
-              description="Tampilkan penggunaan disk"
+              description="Show disk usage"
             >
               <Switch 
                 checked={settings.showDisk} 
@@ -162,31 +126,20 @@ export const SettingsPanel = ({
         {/* Move Destination Section */}
         <div className="mb-4">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 px-1">
-            Move Destination
+            File Operations
           </p>
           
-          <div className="p-3 rounded-lg bg-card/50 border border-border/50">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-md bg-muted text-muted-foreground">
-                <FolderOutput size={16} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-medium text-foreground">Folder Tujuan</h4>
-                <p className="text-xs text-muted-foreground truncate">
-                  {settings.moveDestination || "Belum dipilih"}
-                </p>
-              </div>
-            </div>
-            
-            <Button 
-              variant="outline"
-              size="sm"
-              className="w-full gap-2"
-              onClick={selectMoveDestination}
+          <div className="space-y-2">
+            <SettingItem
+              icon={<FolderOutput size={16} />}
+              title="Move Destination"
+              description="Enable destination folder selection"
             >
-              <FolderOpen size={14} />
-              Browse Folder
-            </Button>
+              <Switch 
+                checked={settings.showMoveDestination} 
+                onCheckedChange={(checked) => updateSetting('showMoveDestination', checked)}
+              />
+            </SettingItem>
           </div>
         </div>
       </div>

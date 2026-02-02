@@ -3,6 +3,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { ExplorerPanel } from "@/components/ExplorerPanel";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { FilePreview } from "@/components/FilePreview";
+import { PreviewSettings } from "@/components/SettingsPanel";
 
 interface FileItem {
   name: string;
@@ -17,6 +18,13 @@ const Index = () => {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [processed, setProcessed] = useState(0);
   const [foldersCreated, setFoldersCreated] = useState(0);
+  const [settings, setSettings] = useState<PreviewSettings>({
+    showCpu: true,
+    showNetwork: true,
+    showMemory: true,
+    showDisk: true,
+    showMoveDestination: false,
+  });
 
   const handleOrganizeStart = (scannedFiles: FileItem[]) => {
     setFiles(scannedFiles);
@@ -44,11 +52,15 @@ const Index = () => {
     <div className="flex flex-col h-screen w-full overflow-hidden">
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
+        <Sidebar 
+          settings={settings}
+          onSettingsChange={setSettings}
+        />
         <ExplorerPanel 
           onOrganizeStart={handleOrganizeStart}
           onStop={handleStop}
           isOrganizing={isOrganizing}
+          showMoveDestination={settings.showMoveDestination}
         />
         {isOrganizing ? (
           <FilePreview 

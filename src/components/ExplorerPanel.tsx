@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FolderOpen, Sparkles, Search, Square, RotateCcw } from "lucide-react";
+import { FolderOpen, Sparkles, Search, Square, RotateCcw, FolderOutput } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -21,37 +21,45 @@ interface ExplorerPanelProps {
   onOrganizeStart: (files: FileItem[]) => void;
   onStop: () => void;
   isOrganizing: boolean;
+  showMoveDestination: boolean;
 }
 
-export const ExplorerPanel = ({ onOrganizeStart, onStop, isOrganizing }: ExplorerPanelProps) => {
+export const ExplorerPanel = ({ onOrganizeStart, onStop, isOrganizing, showMoveDestination }: ExplorerPanelProps) => {
   const [sourceFolder, setSourceFolder] = useState<FolderInfo | null>(null);
+  const [destinationFolder, setDestinationFolder] = useState<FolderInfo | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     setIsProcessing(isOrganizing);
   }, [isOrganizing]);
 
-  const selectFolder = async () => {
+  const selectFolder = async (type: 'source' | 'destination') => {
     try {
       if (!('showDirectoryPicker' in window)) {
-        toast.error("Browser tidak mendukung fitur ini. Gunakan Chrome atau Edge terbaru.");
+        toast.error("Browser does not support this feature. Use latest Chrome or Edge.");
         return;
       }
 
       const handle = await (window as any).showDirectoryPicker();
       const path = handle.name;
       
-      setSourceFolder({ name: handle.name, path, handle });
-      toast.success(`Folder selected: ${handle.name}`);
+      if (type === 'source') {
+        setSourceFolder({ name: handle.name, path, handle });
+        toast.success(`Source folder selected: ${handle.name}`);
+      } else {
+        setDestinationFolder({ name: handle.name, path, handle });
+        toast.success(`Destination folder selected: ${handle.name}`);
+      }
     } catch (error: any) {
       if (error.name !== 'AbortError') {
-        toast.error("Gagal memilih folder");
+        toast.error("Failed to select folder");
       }
     }
   };
 
   const resetSelection = () => {
     setSourceFolder(null);
+    setDestinationFolder(null);
     setIsProcessing(false);
     onStop();
   };
@@ -72,7 +80,7 @@ export const ExplorerPanel = ({ onOrganizeStart, onStop, isOrganizing }: Explore
             try {
               const file = await entry.getFile();
               size = formatFileSize(file.size);
-              lastModified = new Date(file.lastModified).toLocaleDateString('id-ID');
+              lastModified = new Date(file.lastModified).toLocaleDateString('en-US');
             } catch (e) {
               // Skip files that can't be read
             }
@@ -91,7 +99,7 @@ export const ExplorerPanel = ({ onOrganizeStart, onStop, isOrganizing }: Explore
         onOrganizeStart(files);
         setIsProcessing(true);
       } catch (error) {
-        toast.error("Gagal membaca folder");
+        toast.error("Failed to read folder");
       }
     }
   };
@@ -143,7 +151,7 @@ export const ExplorerPanel = ({ onOrganizeStart, onStop, isOrganizing }: Explore
         <span className="text-xs font-semibold uppercase tracking-wider text-sidebar-foreground">
           File Organizer
         </span>
-        {sourceFolder && (
+        {(sourceFolder || destinationFolder) && (
           <button 
             onClick={resetSelection}
             className="flex items-center gap-1.5 px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent rounded transition-colors"
@@ -155,7 +163,7 @@ export const ExplorerPanel = ({ onOrganizeStart, onStop, isOrganizing }: Explore
       </div>
       
       <div className="flex-1 flex flex-col p-4 space-y-4 overflow-auto">
-        {/* Folder Path Card */}
+        {/* Source Folder Path Card */}
         <div className="rounded-xl bg-card border border-border p-4">
           <div className="flex items-center gap-2 mb-4">
             <FolderOpen size={18} className="text-primary" />
@@ -172,11 +180,36 @@ export const ExplorerPanel = ({ onOrganizeStart, onStop, isOrganizing }: Explore
           
           <Button 
             className="w-full"
-            onClick={selectFolder}
+            onClick={() => selectFolder('source')}
           >
             Browse Folder
           </Button>
         </div>
+
+        {/* Destination Folder Path Card - Only shown when showMoveDestination is true */}
+        {showMoveDestination && (
+          <div className="rounded-xl bg-card border border-border p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <FolderOutput size={18} className="text-primary" />
+              <span className="text-sm font-semibold text-foreground">Destination Folder</span>
+            </div>
+            
+            <div className="mb-3">
+              <div className="flex items-center gap-2 px-3 py-2.5 bg-muted rounded-lg border border-border">
+                <span className="text-sm text-muted-foreground truncate flex-1">
+                  {destinationFolder ? destinationFolder.path : "No folder selected"}
+                </span>
+              </div>
+            </div>
+            
+            <Button 
+              className="w-full"
+              onClick={() => selectFolder('destination')}
+            >
+              Browse Folder
+            </Button>
+          </div>
+        )}
 
         {/* Actions Card */}
         <div className="rounded-xl bg-card border border-border p-4">
