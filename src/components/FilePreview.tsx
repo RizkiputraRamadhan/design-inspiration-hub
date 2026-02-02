@@ -36,61 +36,51 @@ export const FilePreview = ({
   ].filter(f => f.count > 0);
 
   return (
-    <div className="flex-1 flex flex-col bg-background overflow-hidden relative">
-      {/* Status Notification - Top Right */}
-      <div className="absolute top-4 right-4 z-10">
-        <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-card border border-border shadow-lg">
-          <div className="relative">
-            <Activity size={16} className="text-primary" />
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+    <div className="flex-1 flex flex-col bg-background overflow-hidden">
+      {/* Top Bar - Stats Left + Status Right */}
+      <div className="flex items-center gap-4 px-4 py-3 border-b border-border bg-muted/20">
+        {/* Stats - Left Side */}
+        <div className="flex items-center gap-4 shrink-0">
+          {/* Total Files */}
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border">
+            <File size={14} className="text-primary" />
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xs text-muted-foreground">Files</span>
+              <span className="text-lg font-bold text-foreground">{totalFiles}</span>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-medium text-foreground">{status}</span>
-            <div className="w-32 mt-1">
-              <Progress value={progress} className="h-1 bg-muted" />
+
+          {/* Processed */}
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border">
+            <CheckSquare size={14} className="text-success" />
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xs text-muted-foreground">Processed</span>
+              <span className="text-lg font-bold text-foreground">{processed}</span>
+            </div>
+          </div>
+
+          {/* Folders Created */}
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border">
+            <FolderPlus size={14} className="text-amber-400" />
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xs text-muted-foreground">Folders</span>
+              <span className="text-lg font-bold text-foreground">{foldersCreated}</span>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Statistics Bar - Desktop Style */}
-      <div className="flex items-center justify-center gap-2 px-6 py-4 border-b border-border bg-muted/20">
-        <div className="flex items-center gap-6">
-          {/* Total Files */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary/20 flex items-center justify-center">
-              <File size={18} className="text-primary" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Total Files</p>
-              <p className="text-xl font-bold text-foreground leading-tight">{totalFiles}</p>
-            </div>
+        {/* Status & Progress - Right Side (Full Width) */}
+        <div className="flex-1 flex items-center gap-3 px-4 py-2 rounded-lg bg-card border border-border">
+          <div className="relative shrink-0">
+            <Activity size={16} className="text-primary" />
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-primary rounded-full animate-pulse" />
           </div>
-
-          <div className="w-px h-10 bg-border" />
-
-          {/* Processed */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-success/20 flex items-center justify-center">
-              <CheckSquare size={18} className="text-success" />
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-sm font-medium text-foreground">{status}</span>
+              <span className="text-xs text-muted-foreground">{Math.round(progress)}%</span>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Processed</p>
-              <p className="text-xl font-bold text-foreground leading-tight">{processed}</p>
-            </div>
-          </div>
-
-          <div className="w-px h-10 bg-border" />
-
-          {/* Folders Created */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center">
-              <FolderPlus size={18} className="text-amber-400" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Folders Created</p>
-              <p className="text-xl font-bold text-foreground leading-tight">{foldersCreated}</p>
-            </div>
+            <Progress value={progress} className="h-1.5 bg-muted" />
           </div>
         </div>
       </div>
