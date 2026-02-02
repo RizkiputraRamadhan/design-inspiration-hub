@@ -162,88 +162,100 @@ export const ExplorerPanel = ({ onOrganizeStart, onStop, isOrganizing, showMoveD
         )}
       </div>
       
-      <div className="flex-1 flex flex-col p-4 space-y-4 overflow-auto">
-        {/* Source Folder Path Card */}
-        <div className="rounded-xl bg-card border border-border p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <FolderOpen size={18} className="text-primary" />
-            <span className="text-sm font-semibold text-foreground">Folder Path</span>
+      <div className="flex-1 flex flex-col p-3 space-y-3 overflow-auto">
+        {/* Source Folder Path - Desktop Style */}
+        <div className="rounded-md bg-card border border-border">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-muted/30">
+            <FolderOpen size={14} className="text-primary shrink-0" />
+            <span className="text-xs font-medium text-foreground">Source Folder</span>
           </div>
           
-          <div className="mb-3">
-            <div className="flex items-center gap-2 px-3 py-2.5 bg-muted rounded-lg border border-border">
-              <span className="text-sm text-muted-foreground truncate flex-1">
-                {sourceFolder ? sourceFolder.path : "No folder selected"}
-              </span>
-            </div>
-          </div>
-          
-          <Button 
-            className="w-full"
-            onClick={() => selectFolder('source')}
-          >
-            Browse Folder
-          </Button>
-        </div>
-
-        {/* Destination Folder Path Card - Only shown when showMoveDestination is true */}
-        {showMoveDestination && (
-          <div className="rounded-xl bg-card border border-border p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <FolderOutput size={18} className="text-primary" />
-              <span className="text-sm font-semibold text-foreground">Destination Folder</span>
-            </div>
-            
-            <div className="mb-3">
-              <div className="flex items-center gap-2 px-3 py-2.5 bg-muted rounded-lg border border-border">
-                <span className="text-sm text-muted-foreground truncate flex-1">
-                  {destinationFolder ? destinationFolder.path : "No folder selected"}
+          <div className="p-2">
+            <div className="flex items-center gap-1">
+              <div className="flex-1 flex items-center gap-2 px-2.5 py-1.5 bg-background rounded border border-input text-xs font-mono">
+                <FolderOpen size={12} className="text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground truncate">
+                  {sourceFolder ? sourceFolder.path : "No folder selected"}
                 </span>
               </div>
+              <Button 
+                variant="outline"
+                size="sm"
+                className="h-7 px-2.5 text-xs shrink-0"
+                onClick={() => selectFolder('source')}
+              >
+                Browse...
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Destination Folder Path - Desktop Style */}
+        {showMoveDestination && (
+          <div className="rounded-md bg-card border border-border">
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-muted/30">
+              <FolderOutput size={14} className="text-primary shrink-0" />
+              <span className="text-xs font-medium text-foreground">Destination Folder</span>
             </div>
             
-            <Button 
-              className="w-full"
-              onClick={() => selectFolder('destination')}
-            >
-              Browse Folder
-            </Button>
+            <div className="p-2">
+              <div className="flex items-center gap-1">
+                <div className="flex-1 flex items-center gap-2 px-2.5 py-1.5 bg-background rounded border border-input text-xs font-mono">
+                  <FolderOutput size={12} className="text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground truncate">
+                    {destinationFolder ? destinationFolder.path : "No folder selected"}
+                  </span>
+                </div>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="h-7 px-2.5 text-xs shrink-0"
+                  onClick={() => selectFolder('destination')}
+                >
+                  Browse...
+                </Button>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Actions Card */}
-        <div className="rounded-xl bg-card border border-border p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Sparkles size={18} className="text-primary" />
-            <span className="text-sm font-semibold text-foreground">Actions</span>
+        {/* Actions - Desktop Style */}
+        <div className="rounded-md bg-card border border-border">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-muted/30">
+            <Sparkles size={14} className="text-primary shrink-0" />
+            <span className="text-xs font-medium text-foreground">Actions</span>
           </div>
           
-          <div className="space-y-3">
+          <div className="p-2 space-y-1.5">
             <Button 
-              className="w-full gap-2"
+              variant="outline"
+              size="sm"
+              className="w-full h-8 gap-2 text-xs justify-start"
               disabled={!sourceFolder}
               onClick={handleScanFiles}
             >
-              <Search size={16} />
+              <Search size={14} />
               Scan Files
             </Button>
             
             <Button 
-              className="w-full gap-2 bg-success hover:bg-success/90 text-success-foreground"
+              size="sm"
+              className="w-full h-8 gap-2 text-xs justify-start bg-success hover:bg-success/90 text-success-foreground"
               disabled={!sourceFolder || isProcessing}
               onClick={handleOrganize}
             >
-              <Sparkles size={16} />
+              <Sparkles size={14} />
               Start Organizing
             </Button>
             
             <Button 
               variant="destructive"
-              className="w-full gap-2"
+              size="sm"
+              className="w-full h-8 gap-2 text-xs justify-start"
               disabled={!isProcessing}
               onClick={handleStop}
             >
-              <Square size={16} />
+              <Square size={14} />
               Stop Process
             </Button>
           </div>
