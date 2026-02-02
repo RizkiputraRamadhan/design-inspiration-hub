@@ -59,6 +59,7 @@ const Index = () => {
             foldersCreated={foldersCreated}
             progress={progress}
             status={status}
+            isProcessing={isOrganizing}
           />
         ) : (
           <WelcomeScreen />

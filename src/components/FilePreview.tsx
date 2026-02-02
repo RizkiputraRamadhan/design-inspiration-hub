@@ -1,4 +1,5 @@
-import { File, CheckSquare, FolderPlus, Folder, ChevronRight, Activity } from "lucide-react";
+import { useState, useEffect } from "react";
+import { File, CheckSquare, FolderPlus, Folder, ChevronRight, Activity, Cpu, HardDrive, Wifi, MemoryStick } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface FileItem {
@@ -16,6 +17,7 @@ interface FilePreviewProps {
   foldersCreated: number;
   progress: number;
   status: string;
+  isProcessing?: boolean;
 }
 
 export const FilePreview = ({ 
@@ -24,8 +26,32 @@ export const FilePreview = ({
   processed, 
   foldersCreated,
   progress,
-  status 
+  status,
+  isProcessing = false
 }: FilePreviewProps) => {
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+      if (isProcessing) {
+        setElapsedTime(prev => prev + 1);
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isProcessing]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const formatCurrentTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', { hour12: false });
+  };
+
   const organizedFolders = [
     { name: "Documents", count: files.filter(f => ['PDF Document', 'Word Document', 'Text File'].includes(f.type)).length },
     { name: "Images", count: files.filter(f => ['JPEG Image', 'PNG Image', 'GIF Image'].includes(f.type)).length },
@@ -35,13 +61,14 @@ export const FilePreview = ({
     { name: "Others", count: files.filter(f => f.isFolder).length },
   ].filter(f => f.count > 0);
 
+  const operationStatus = isProcessing ? "Processing..." : processed > 0 ? "Operation complete" : "Ready to scan";
+
   return (
     <div className="flex-1 flex flex-col bg-background overflow-hidden">
       {/* Top Bar - Stats Left + Status Right */}
       <div className="flex items-center gap-4 px-4 py-3 border-b border-border bg-muted/20">
         {/* Stats - Left Side */}
         <div className="flex items-center gap-4 shrink-0">
-          {/* Total Files */}
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border">
             <File size={14} className="text-primary" />
             <div className="flex items-baseline gap-1.5">
@@ -50,7 +77,6 @@ export const FilePreview = ({
             </div>
           </div>
 
-          {/* Processed */}
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border">
             <CheckSquare size={14} className="text-success" />
             <div className="flex items-baseline gap-1.5">
@@ -59,7 +85,6 @@ export const FilePreview = ({
             </div>
           </div>
 
-          {/* Folders Created */}
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border">
             <FolderPlus size={14} className="text-amber-400" />
             <div className="flex items-baseline gap-1.5">
@@ -69,7 +94,7 @@ export const FilePreview = ({
           </div>
         </div>
 
-        {/* Status & Progress - Right Side (Full Width) */}
+        {/* Status & Progress - Right Side */}
         <div className="flex-1 flex items-center gap-3 px-4 py-2 rounded-lg bg-card border border-border">
           <div className="relative shrink-0">
             <Activity size={16} className="text-primary" />
@@ -131,9 +156,6 @@ export const FilePreview = ({
               </tbody>
             </table>
           </div>
-          <div className="px-4 py-1.5 bg-muted/30 border-t border-border text-xs text-muted-foreground">
-            {files.length} items
-          </div>
         </div>
         
         {/* Right Panel - Organized Result */}
@@ -165,9 +187,61 @@ export const FilePreview = ({
               </div>
             )}
           </div>
-          <div className="px-4 py-1.5 bg-muted/30 border-t border-border text-xs text-muted-foreground">
-            {organizedFolders.length} folders
+        </div>
+      </div>
+
+      {/* Footer - Status Bar */}
+      <div className="border-t border-border bg-muted/30">
+        {/* Main Status Row */}
+        <div className="flex items-center justify-between px-4 py-2 border-b border-border/50">
+          <div className="flex items-center gap-3">
+            <div className={`w-2.5 h-2.5 rounded-full ${isProcessing ? 'bg-amber-400 animate-pulse' : processed > 0 ? 'bg-success' : 'bg-muted-foreground'}`} />
+            <CheckSquare size={14} className="text-muted-foreground" />
+            <Folder size={14} className="text-muted-foreground" />
+            <span className="text-sm text-foreground">
+              {foldersCreated > 0 ? `Created ${foldersCreated} folders` : 'Ready to organize'}
+            </span>
           </div>
+          <span className="text-sm text-muted-foreground">{formatCurrentTime(currentTime)}</span>
+        </div>
+
+        {/* Details Row */}
+        <div className="flex items-center justify-between px-4 py-1.5">
+          <div className="flex items-center gap-6">
+            <span className="text-xs text-muted-foreground">
+              Completed in: <span className="text-foreground">{formatTime(elapsedTime)}</span>
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Remaining: <span className="text-foreground">00:00</span>
+            </span>
+            
+            <div className="flex items-center gap-4 ml-4 pl-4 border-l border-border">
+              <div className="flex items-center gap-1.5">
+                <Cpu size={12} className="text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">CPU</span>
+                <span className="text-xs text-foreground">12%</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <MemoryStick size={12} className="text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Memory</span>
+                <span className="text-xs text-foreground">45%</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <HardDrive size={12} className="text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Disk</span>
+                <span className="text-xs text-foreground">2%</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Wifi size={12} className="text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Network</span>
+                <span className="text-xs text-foreground">0 KB/s</span>
+              </div>
+            </div>
+          </div>
+          
+          <span className={`text-xs font-medium ${processed > 0 ? 'text-success' : 'text-muted-foreground'}`}>
+            {operationStatus}
+          </span>
         </div>
       </div>
     </div>
