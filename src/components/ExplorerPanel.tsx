@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FolderOpen, FolderInput, ArrowDown, Check, RotateCcw, RefreshCw } from "lucide-react";
+import { FolderOpen, Sparkles, Search, Square, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -9,77 +9,10 @@ interface FolderInfo {
   handle: FileSystemDirectoryHandle;
 }
 
-interface FolderCardProps {
-  step: number;
-  label: string;
-  folder: FolderInfo | null;
-  onSelect: () => void;
-  disabled?: boolean;
-}
-
-const FolderCard = ({ step, label, folder, onSelect, disabled }: FolderCardProps) => {
-  return (
-    <div className={`rounded-xl border transition-all ${
-      folder 
-        ? 'bg-primary/5 border-primary/30' 
-        : disabled 
-          ? 'bg-muted/30 border-border opacity-60' 
-          : 'bg-card border-border hover:border-primary/50'
-    }`}>
-      <div className="p-4">
-        <div className="flex items-center gap-3 mb-3">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold ${
-            folder ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-          }`}>
-            {folder ? <Check size={16} /> : step}
-          </div>
-          <span className="text-sm font-medium text-foreground">{label}</span>
-        </div>
-        
-        {folder ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 p-3 bg-background rounded-lg border border-border">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <FolderOpen size={20} className="text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
-                  {folder.name}
-                </p>
-                <p className="text-xs text-muted-foreground truncate" title={folder.path}>
-                  {folder.path}
-                </p>
-              </div>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="w-full gap-2 text-muted-foreground hover:text-foreground"
-              onClick={onSelect}
-            >
-              <RefreshCw size={14} />
-              Browse Again
-            </Button>
-          </div>
-        ) : (
-          <Button 
-            className="w-full gap-2" 
-            size="default"
-            disabled={disabled}
-            onClick={onSelect}
-          >
-            <FolderInput size={18} />
-            Browse Folder
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-};
-
 export const ExplorerPanel = () => {
   const [sourceFolder, setSourceFolder] = useState<FolderInfo | null>(null);
   const [destinationFolder, setDestinationFolder] = useState<FolderInfo | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const selectFolder = async (type: 'source' | 'destination') => {
     try {
@@ -89,9 +22,7 @@ export const ExplorerPanel = () => {
       }
 
       const handle = await (window as any).showDirectoryPicker();
-      
-      // Get relative path representation
-      const path = `/${handle.name}`;
+      const path = handle.name;
       
       if (type === 'source') {
         setSourceFolder({ name: handle.name, path, handle });
@@ -110,12 +41,25 @@ export const ExplorerPanel = () => {
   const resetSelection = () => {
     setSourceFolder(null);
     setDestinationFolder(null);
+    setIsProcessing(false);
+  };
+
+  const handleScanFiles = () => {
+    if (sourceFolder) {
+      toast.info(`Scanning files in "${sourceFolder.name}"...`);
+    }
   };
 
   const handleOrganize = () => {
     if (sourceFolder && destinationFolder) {
+      setIsProcessing(true);
       toast.success(`Organizing files from "${sourceFolder.name}" to "${destinationFolder.name}"`);
     }
+  };
+
+  const handleStop = () => {
+    setIsProcessing(false);
+    toast.info("Process stopped");
   };
 
   return (
@@ -128,7 +72,6 @@ export const ExplorerPanel = () => {
           <button 
             onClick={resetSelection}
             className="flex items-center gap-1.5 px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent rounded transition-colors"
-            title="Reset All"
           >
             <RotateCcw size={12} />
             Reset
@@ -137,45 +80,90 @@ export const ExplorerPanel = () => {
       </div>
       
       <div className="flex-1 flex flex-col p-4 space-y-4 overflow-auto">
-        {/* Source Folder */}
-        <FolderCard
-          step={1}
-          label="Source Folder"
-          folder={sourceFolder}
-          onSelect={() => selectFolder('source')}
-        />
-
-        {/* Arrow */}
-        <div className="flex justify-center py-1">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            sourceFolder ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
-          }`}>
-            <ArrowDown size={18} />
+        {/* Source Folder Card */}
+        <div className="rounded-xl bg-card border border-border p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <FolderOpen size={18} className="text-primary" />
+            <span className="text-sm font-semibold text-foreground">Source Path</span>
           </div>
+          
+          <div className="mb-3">
+            <div className="flex items-center gap-2 px-3 py-2.5 bg-muted rounded-lg border border-border">
+              <span className="text-sm text-muted-foreground truncate flex-1">
+                {sourceFolder ? sourceFolder.path : "No folder selected"}
+              </span>
+            </div>
+          </div>
+          
+          <Button 
+            className="w-full"
+            onClick={() => selectFolder('source')}
+          >
+            Browse Folder
+          </Button>
         </div>
 
-        {/* Destination Folder */}
-        <FolderCard
-          step={2}
-          label="Destination Folder"
-          folder={destinationFolder}
-          onSelect={() => selectFolder('destination')}
-          disabled={!sourceFolder}
-        />
+        {/* Destination Folder Card */}
+        <div className="rounded-xl bg-card border border-border p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <FolderOpen size={18} className="text-primary" />
+            <span className="text-sm font-semibold text-foreground">Destination Path</span>
+          </div>
+          
+          <div className="mb-3">
+            <div className="flex items-center gap-2 px-3 py-2.5 bg-muted rounded-lg border border-border">
+              <span className="text-sm text-muted-foreground truncate flex-1">
+                {destinationFolder ? destinationFolder.path : "No folder selected"}
+              </span>
+            </div>
+          </div>
+          
+          <Button 
+            className="w-full"
+            disabled={!sourceFolder}
+            onClick={() => selectFolder('destination')}
+          >
+            Browse Folder
+          </Button>
+        </div>
 
-        {/* Organize Button */}
-        {sourceFolder && destinationFolder && (
-          <div className="pt-4">
+        {/* Actions Card */}
+        <div className="rounded-xl bg-card border border-border p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles size={18} className="text-primary" />
+            <span className="text-sm font-semibold text-foreground">Actions</span>
+          </div>
+          
+          <div className="space-y-3">
             <Button 
-              className="w-full gap-2 h-11" 
-              size="lg"
+              className="w-full gap-2"
+              disabled={!sourceFolder}
+              onClick={handleScanFiles}
+            >
+              <Search size={16} />
+              Scan Files
+            </Button>
+            
+            <Button 
+              className="w-full gap-2 bg-success hover:bg-success/90 text-success-foreground"
+              disabled={!sourceFolder || !destinationFolder || isProcessing}
               onClick={handleOrganize}
             >
-              <Check size={18} />
+              <Sparkles size={16} />
               Start Organizing
             </Button>
+            
+            <Button 
+              variant="destructive"
+              className="w-full gap-2"
+              disabled={!isProcessing}
+              onClick={handleStop}
+            >
+              <Square size={16} />
+              Stop Process
+            </Button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
