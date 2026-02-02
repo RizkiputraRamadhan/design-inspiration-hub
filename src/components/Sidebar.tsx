@@ -2,7 +2,6 @@ import { useState } from "react";
 import { 
   FolderOpen, 
   Sparkles,
-  LayoutGrid,
   Settings,
   User
 } from "lucide-react";
@@ -44,12 +43,11 @@ export const Sidebar = () => {
             tooltip="AI Organize" 
             onClick={() => setShowAISettings(!showAISettings)}
           />
-          <SidebarIcon icon={<LayoutGrid size={22} />} tooltip="Categories" />
+          <SidebarIcon icon={<Settings size={22} />} tooltip="Settings" />
         </div>
         
         <div className="mt-auto flex flex-col items-center py-3 space-y-1">
           <SidebarIcon icon={<User size={22} />} tooltip="Profile" />
-          <SidebarIcon icon={<Settings size={22} />} tooltip="Settings" />
         </div>
       </div>
 
