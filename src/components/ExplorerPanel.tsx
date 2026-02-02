@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FolderOpen, Sparkles, Search, Square, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -9,9 +9,27 @@ interface FolderInfo {
   handle: FileSystemDirectoryHandle;
 }
 
-export const ExplorerPanel = () => {
+interface FileItem {
+  name: string;
+  size: string;
+  type: string;
+  lastModified: string;
+  isFolder: boolean;
+}
+
+interface ExplorerPanelProps {
+  onOrganizeStart: (files: FileItem[]) => void;
+  onStop: () => void;
+  isOrganizing: boolean;
+}
+
+export const ExplorerPanel = ({ onOrganizeStart, onStop, isOrganizing }: ExplorerPanelProps) => {
   const [sourceFolder, setSourceFolder] = useState<FolderInfo | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    setIsProcessing(isOrganizing);
+  }, [isOrganizing]);
 
   const selectFolder = async () => {
     try {
@@ -35,24 +53,88 @@ export const ExplorerPanel = () => {
   const resetSelection = () => {
     setSourceFolder(null);
     setIsProcessing(false);
+    onStop();
   };
 
-  const handleScanFiles = () => {
+  const handleScanFiles = async () => {
     if (sourceFolder) {
       toast.info(`Scanning files in "${sourceFolder.name}"...`);
+      
+      try {
+        const files: FileItem[] = [];
+        
+        for await (const entry of (sourceFolder.handle as any).values()) {
+          const isFolder = entry.kind === 'directory';
+          let size = '-';
+          let lastModified = '-';
+          
+          if (!isFolder) {
+            try {
+              const file = await entry.getFile();
+              size = formatFileSize(file.size);
+              lastModified = new Date(file.lastModified).toLocaleDateString('id-ID');
+            } catch (e) {
+              // Skip files that can't be read
+            }
+          }
+          
+          files.push({
+            name: entry.name,
+            size: isFolder ? '-' : size,
+            type: isFolder ? 'File folder' : getFileType(entry.name),
+            lastModified: isFolder ? '-' : lastModified,
+            isFolder
+          });
+        }
+        
+        toast.success(`Found ${files.length} items`);
+        onOrganizeStart(files);
+        setIsProcessing(true);
+      } catch (error) {
+        toast.error("Gagal membaca folder");
+      }
     }
   };
 
-  const handleOrganize = () => {
+  const handleOrganize = async () => {
     if (sourceFolder) {
-      setIsProcessing(true);
-      toast.success(`Organizing files in "${sourceFolder.name}"`);
+      await handleScanFiles();
     }
   };
 
   const handleStop = () => {
     setIsProcessing(false);
+    onStop();
     toast.info("Process stopped");
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  };
+
+  const getFileType = (filename: string): string => {
+    const ext = filename.split('.').pop()?.toLowerCase() || '';
+    const types: Record<string, string> = {
+      'pdf': 'PDF Document',
+      'doc': 'Word Document',
+      'docx': 'Word Document',
+      'xls': 'Excel Spreadsheet',
+      'xlsx': 'Excel Spreadsheet',
+      'jpg': 'JPEG Image',
+      'jpeg': 'JPEG Image',
+      'png': 'PNG Image',
+      'gif': 'GIF Image',
+      'mp4': 'MP4 Video',
+      'mp3': 'MP3 Audio',
+      'txt': 'Text File',
+      'zip': 'ZIP Archive',
+      'rar': 'RAR Archive',
+    };
+    return types[ext] || `${ext.toUpperCase()} File`;
   };
 
   return (
