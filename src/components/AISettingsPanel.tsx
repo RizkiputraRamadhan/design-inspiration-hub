@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Sparkles, FolderTree, Tags, FileSearch, Wand2, Lock, X } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 
 interface AISettingsPanelProps {
@@ -77,7 +78,8 @@ export const AISettingsPanel = ({ isOpen, onClose }: AISettingsPanelProps) => {
       </div>
 
       {/* Features List */}
-      <div className="flex-1 overflow-auto p-3 space-y-2">
+      <ScrollArea className="flex-1">
+        <div className="p-3 space-y-2">
         {aiFeatures.map((feature) => {
           const isActive = activeFeatures[feature.id] || false;
           
@@ -136,9 +138,10 @@ export const AISettingsPanel = ({ isOpen, onClose }: AISettingsPanelProps) => {
                 </div>
               )}
             </div>
-          );
-        })}
-      </div>
+        );
+      })}
+        </div>
+      </ScrollArea>
 
       {/* Footer */}
       <div className="p-3 border-t border-border">
