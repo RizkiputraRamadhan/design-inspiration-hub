@@ -1,5 +1,6 @@
 import { X, User, LogIn, LogOut, Monitor, Cpu, BarChart3, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
 
 interface UserPanelProps {
@@ -86,7 +87,8 @@ export const UserPanel = ({ isOpen, onClose }: UserPanelProps) => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <ScrollArea className="flex-1">
+        <div className="p-4 space-y-4">
         {!isLoggedIn ? (
           /* Not Logged In State */
           <div className="flex flex-col items-center justify-center h-full text-center">
@@ -176,7 +178,8 @@ export const UserPanel = ({ isOpen, onClose }: UserPanelProps) => {
             </Button>
           </>
         )}
-      </div>
+        </div>
+      </ScrollArea>
     </div>
   );
 };
