@@ -1,12 +1,81 @@
 import { useState } from "react";
-import { FolderOpen, FolderInput, ArrowRight, Check, RotateCcw } from "lucide-react";
+import { FolderOpen, FolderInput, ArrowDown, Check, RotateCcw, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 interface FolderInfo {
   name: string;
+  path: string;
   handle: FileSystemDirectoryHandle;
 }
+
+interface FolderCardProps {
+  step: number;
+  label: string;
+  folder: FolderInfo | null;
+  onSelect: () => void;
+  disabled?: boolean;
+}
+
+const FolderCard = ({ step, label, folder, onSelect, disabled }: FolderCardProps) => {
+  return (
+    <div className={`rounded-xl border transition-all ${
+      folder 
+        ? 'bg-primary/5 border-primary/30' 
+        : disabled 
+          ? 'bg-muted/30 border-border opacity-60' 
+          : 'bg-card border-border hover:border-primary/50'
+    }`}>
+      <div className="p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold ${
+            folder ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+          }`}>
+            {folder ? <Check size={16} /> : step}
+          </div>
+          <span className="text-sm font-medium text-foreground">{label}</span>
+        </div>
+        
+        {folder ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 p-3 bg-background rounded-lg border border-border">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <FolderOpen size={20} className="text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">
+                  {folder.name}
+                </p>
+                <p className="text-xs text-muted-foreground truncate" title={folder.path}>
+                  {folder.path}
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full gap-2 text-muted-foreground hover:text-foreground"
+              onClick={onSelect}
+            >
+              <RefreshCw size={14} />
+              Browse Again
+            </Button>
+          </div>
+        ) : (
+          <Button 
+            className="w-full gap-2" 
+            size="default"
+            disabled={disabled}
+            onClick={onSelect}
+          >
+            <FolderInput size={18} />
+            Browse Folder
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export const ExplorerPanel = () => {
   const [sourceFolder, setSourceFolder] = useState<FolderInfo | null>(null);
@@ -14,7 +83,6 @@ export const ExplorerPanel = () => {
 
   const selectFolder = async (type: 'source' | 'destination') => {
     try {
-      // Check if the API is supported
       if (!('showDirectoryPicker' in window)) {
         toast.error("Browser tidak mendukung fitur ini. Gunakan Chrome atau Edge terbaru.");
         return;
@@ -22,15 +90,17 @@ export const ExplorerPanel = () => {
 
       const handle = await (window as any).showDirectoryPicker();
       
+      // Get relative path representation
+      const path = `/${handle.name}`;
+      
       if (type === 'source') {
-        setSourceFolder({ name: handle.name, handle });
-        toast.success(`Source folder: ${handle.name}`);
+        setSourceFolder({ name: handle.name, path, handle });
+        toast.success(`Source: ${handle.name}`);
       } else {
-        setDestinationFolder({ name: handle.name, handle });
-        toast.success(`Destination folder: ${handle.name}`);
+        setDestinationFolder({ name: handle.name, path, handle });
+        toast.success(`Destination: ${handle.name}`);
       }
     } catch (error: any) {
-      // User cancelled the picker
       if (error.name !== 'AbortError') {
         toast.error("Gagal memilih folder");
       }
@@ -45,101 +115,66 @@ export const ExplorerPanel = () => {
   const handleOrganize = () => {
     if (sourceFolder && destinationFolder) {
       toast.success(`Organizing files from "${sourceFolder.name}" to "${destinationFolder.name}"`);
-      // Here you would implement the actual file organizing logic
     }
   };
 
   return (
-    <div className="flex flex-col h-full w-72 bg-sidebar border-r border-sidebar-border">
+    <div className="flex flex-col h-full w-80 bg-sidebar border-r border-sidebar-border">
       <div className="flex items-center justify-between px-4 py-3 border-b border-sidebar-border">
         <span className="text-xs font-semibold uppercase tracking-wider text-sidebar-foreground">
-          Files
+          File Organizer
         </span>
         {(sourceFolder || destinationFolder) && (
           <button 
             onClick={resetSelection}
-            className="p-1 hover:bg-sidebar-accent rounded text-sidebar-foreground"
-            title="Reset"
+            className="flex items-center gap-1.5 px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent rounded transition-colors"
+            title="Reset All"
           >
-            <RotateCcw size={14} />
+            <RotateCcw size={12} />
+            Reset
           </button>
         )}
       </div>
       
-      <div className="flex-1 flex flex-col px-4 py-6">
-        {/* Step 1: Source Folder */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-              sourceFolder ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-            }`}>
-              {sourceFolder ? <Check size={14} /> : '1'}
-            </div>
-            <span className="text-sm font-medium text-foreground">Source Folder</span>
+      <div className="flex-1 flex flex-col p-4 space-y-4 overflow-auto">
+        {/* Source Folder */}
+        <FolderCard
+          step={1}
+          label="Source Folder"
+          folder={sourceFolder}
+          onSelect={() => selectFolder('source')}
+        />
+
+        {/* Arrow */}
+        <div className="flex justify-center py-1">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+            sourceFolder ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+          }`}>
+            <ArrowDown size={18} />
           </div>
-          
-          {sourceFolder ? (
-            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border">
-              <FolderOpen size={18} className="text-primary shrink-0" />
-              <span className="text-sm text-foreground truncate">{sourceFolder.name}</span>
-            </div>
-          ) : (
-            <Button 
-              className="w-full gap-2" 
-              size="sm"
-              onClick={() => selectFolder('source')}
-            >
-              <FolderInput size={16} />
-              Select Source
-            </Button>
-          )}
         </div>
 
-        {/* Arrow Indicator */}
-        <div className="flex justify-center mb-6">
-          <ArrowRight size={20} className={`${sourceFolder ? 'text-primary' : 'text-muted-foreground'}`} />
-        </div>
-
-        {/* Step 2: Destination Folder */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-              destinationFolder ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-            }`}>
-              {destinationFolder ? <Check size={14} /> : '2'}
-            </div>
-            <span className="text-sm font-medium text-foreground">Destination Folder</span>
-          </div>
-          
-          {destinationFolder ? (
-            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border">
-              <FolderOpen size={18} className="text-primary shrink-0" />
-              <span className="text-sm text-foreground truncate">{destinationFolder.name}</span>
-            </div>
-          ) : (
-            <Button 
-              className="w-full gap-2" 
-              size="sm"
-              variant={sourceFolder ? "default" : "outline"}
-              disabled={!sourceFolder}
-              onClick={() => selectFolder('destination')}
-            >
-              <FolderInput size={16} />
-              Select Destination
-            </Button>
-          )}
-        </div>
+        {/* Destination Folder */}
+        <FolderCard
+          step={2}
+          label="Destination Folder"
+          folder={destinationFolder}
+          onSelect={() => selectFolder('destination')}
+          disabled={!sourceFolder}
+        />
 
         {/* Organize Button */}
         {sourceFolder && destinationFolder && (
-          <Button 
-            className="w-full gap-2 mt-auto" 
-            size="sm"
-            onClick={handleOrganize}
-          >
-            <Check size={16} />
-            Start Organizing
-          </Button>
+          <div className="pt-4">
+            <Button 
+              className="w-full gap-2 h-11" 
+              size="lg"
+              onClick={handleOrganize}
+            >
+              <Check size={18} />
+              Start Organizing
+            </Button>
+          </div>
         )}
       </div>
     </div>
