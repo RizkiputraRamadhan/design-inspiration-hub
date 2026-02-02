@@ -171,11 +171,13 @@ export const FilePreview = ({
               </TabsList>
             </div>
             
-            <TabsContent value="settings" className="flex-1 overflow-auto p-3 m-0">
-              <FileMetadataForm 
-                metadata={metadata}
-                onMetadataChange={onMetadataChange}
-              />
+            <TabsContent value="settings" className="flex-1 overflow-hidden p-3 m-0">
+              <div className="h-full">
+                <FileMetadataForm 
+                  metadata={metadata}
+                  onMetadataChange={onMetadataChange}
+                />
+              </div>
             </TabsContent>
             
             <TabsContent value="preview" className="flex-1 overflow-auto p-3 m-0">
