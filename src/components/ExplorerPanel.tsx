@@ -1,4 +1,4 @@
-import { FolderOpen, Sparkles, BookOpen } from "lucide-react";
+import { FolderOpen, FolderInput, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const ExplorerPanel = () => {
@@ -16,32 +16,25 @@ export const ExplorerPanel = () => {
         </div>
         
         <h3 className="text-sm font-medium text-foreground mb-2">
-          No Folder Selected
+          Select Source Folder
         </h3>
         
         <p className="text-xs text-muted-foreground text-center mb-6">
-          Select a folder to let AI organize your files automatically
+          Choose a folder to organize, then select the destination
         </p>
         
-        <div className="w-full space-y-3">
+        <div className="w-full space-y-4">
           <Button className="w-full gap-2" size="sm">
-            <FolderOpen size={16} />
+            <FolderInput size={16} />
             Select Folder
           </Button>
           
-          <Button variant="outline" className="w-full gap-2" size="sm">
-            <Sparkles size={16} />
-            Quick Organize
-          </Button>
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <span>Source</span>
+            <ArrowRight size={14} />
+            <span>Destination</span>
+          </div>
         </div>
-        
-        <a 
-          href="#" 
-          className="flex items-center gap-2 mt-6 text-xs text-primary hover:underline"
-        >
-          <BookOpen size={14} />
-          How AI organizing works
-        </a>
       </div>
     </div>
   );
